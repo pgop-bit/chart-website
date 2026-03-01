@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Assessment Tool — CHART</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy:#0A2540;--navy2:#0F3460;--teal:#007A5E;--teal-lt:#E6F4F1;
+  --slate:#5C6B7A;--border:#D4DAE2;--bg:#FAFAF8;--white:#FFFFFF;
+  --text:#1A2332;--muted:#6B7A8D;--amber:#C67C00;--danger:#B43232;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:200;background:rgba(250,250,248,0.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;}
+.nav-logo{display:flex;align-items:baseline;gap:0.65rem;text-decoration:none;}
+.nav-logo-mark{font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:500;color:var(--navy);}
+.nav-logo-mark span{color:var(--teal);}
+.nav-logo-sub{font-size:0.65rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:500;border-left:1px solid var(--border);padding-left:0.65rem;}
+.nav-links{display:flex;gap:2rem;align-items:center;}
+.nav-links a{font-size:0.8rem;font-weight:500;color:var(--slate);text-decoration:none;}
+.nav-links a:hover{color:var(--navy);}
+.nav-links a.active{color:var(--navy);font-weight:600;}
+.btn-nav-outline{background:transparent;color:var(--navy)!important;padding:0.4rem 1rem;border-radius:4px;border:1.5px solid var(--border)!important;font-size:0.78rem!important;}
+
+/* ── TOOL LAYOUT ── */
+.tool-wrap{display:grid;grid-template-columns:360px 1fr;height:calc(100vh - 60px);}
+
+/* ── LEFT PANEL ── */
+.left-panel{background:var(--white);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+.left-panel::-webkit-scrollbar{width:4px;}
+.left-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.panel-header{padding:1.4rem 1.6rem 1rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--white);z-index:10;}
+.panel-header h2{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--teal);margin-bottom:0.2rem;}
+.panel-header p{font-size:0.78rem;color:var(--muted);}
+
+.section{padding:1.2rem 1.6rem;border-bottom:1px solid var(--border);}
+.section-head{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:0.9rem;display:flex;align-items:center;gap:0.4rem;}
+.section-head::before{content:attr(data-n);color:var(--teal);font-weight:500;}
+
+/* Form elements */
+.field{margin-bottom:0.9rem;}
+.field:last-child{margin-bottom:0;}
+label{display:block;font-size:0.72rem;font-weight:500;color:var(--slate);margin-bottom:0.3rem;letter-spacing:0.02em;}
+input[type=text],input[type=number],select{
+  width:100%;padding:0.45rem 0.7rem;
+  background:var(--bg);border:1px solid var(--border);border-radius:4px;
+  font-size:0.82rem;font-family:'IBM Plex Sans',sans-serif;color:var(--text);
+  transition:border-color 0.15s;
+}
+input[type=text]:focus,input[type=number]:focus,select:focus{
+  outline:none;border-color:var(--teal);background:var(--white);
+}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+.field-hint{font-size:0.68rem;color:var(--muted);margin-top:0.2rem;line-height:1.4;}
+
+/* Sliders */
+.slider-field{margin-bottom:0.75rem;}
+.slider-row{display:flex;align-items:center;gap:0.6rem;}
+.slider-row label{flex:0 0 150px;margin:0;font-size:0.75rem;}
+input[type=range]{flex:1;accent-color:var(--teal);height:3px;}
+.slider-val{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--navy);flex:0 0 38px;text-align:right;}
+
+.weight-sum{
+  padding:0.5rem 0.8rem;border-radius:4px;text-align:center;
+  font-family:'IBM Plex Mono',monospace;font-size:0.82rem;font-weight:500;
+  margin-top:0.5rem;transition:all 0.2s;
+}
+.weight-sum.ok{background:var(--teal-lt);color:var(--teal);}
+.weight-sum.warn{background:#FEF3E2;color:var(--amber);}
+.weight-sum.err{background:#FDECEA;color:var(--danger);}
+
+.preset-select{margin-bottom:0.9rem;}
+
+/* Run button */
+.run-btn{
+  width:100%;padding:0.75rem;
+  background:var(--navy);color:var(--white);
+  border:none;border-radius:4px;cursor:pointer;
+  font-size:0.875rem;font-weight:600;font-family:'IBM Plex Sans',sans-serif;
+  letter-spacing:0.02em;transition:background 0.15s;margin-top:0.3rem;
+}
+.run-btn:hover{background:var(--navy2);}
+.run-btn:active{transform:scale(0.99);}
+
+/* ── RIGHT PANEL ── */
+.right-panel{overflow-y:auto;background:var(--bg);}
+.right-panel::-webkit-scrollbar{width:4px;}
+.right-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* Empty state */
+.empty-state{
+  height:100%;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:1rem;text-align:center;padding:3rem;
+  color:var(--muted);
+}
+.empty-icon{font-size:3rem;opacity:0.2;}
+.empty-state h3{font-size:1rem;font-weight:500;color:var(--slate);}
+.empty-state p{font-size:0.82rem;max-width:300px;line-height:1.6;}
+
+/* Results */
+.results{padding:2rem 2.5rem;}
+.results-header{margin-bottom:2rem;}
+.site-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;color:var(--navy);letter-spacing:-0.02em;}
+.site-meta{display:flex;align-items:center;gap:1rem;margin-top:0.4rem;flex-wrap:wrap;}
+.site-region{font-size:0.78rem;color:var(--muted);}
+.site-coords{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--muted);}
+
+/* Score cards */
+.score-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+.score-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:1.2rem;text-align:center;border-top:3px solid;}
+.score-card.current{border-top-color:var(--slate);}
+.score-card.ssp245{border-top-color:#1d6fa4;}
+.score-card.ssp585{border-top-color:var(--teal);}
+.score-scenario{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem;}
+.score-value{font-family:'IBM Plex Mono',monospace;font-size:2.4rem;font-weight:500;line-height:1;display:block;}
+.score-max{font-size:0.7rem;color:var(--muted);}
+
+/* Resilience + BOEM row */
+.meta-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.meta-card{background:var(--white);border:1px solid var(--border);border-radius:6px;padding:1rem 1.2rem;}
+.meta-card-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:0.4rem;}
+.badge{display:inline-block;padding:0.25rem 0.8rem;border-radius:3px;font-size:0.78rem;font-weight:500;font-family:'IBM Plex Mono',monospace;}
+.badge-high{background:rgba(0,122,94,0.1);color:var(--teal);border:1px solid rgba(0,122,94,0.2);}
+.badge-mod{background:rgba(198,124,0,0.1);color:var(--amber);border:1px solid rgba(198,124,0,0.2);}
+.badge-low{background:rgba(180,50,50,0.1);color:var(--danger);border:1px solid rgba(180,50,50,0.2);}
+.boem-delta{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:500;}
+
+/* Tabs */
+.tabs-wrap{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:1.5rem;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg);}
+.tab-btn{padding:0.7rem 1.2rem;font-size:0.78rem;font-weight:500;color:var(--muted);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'IBM Plex Sans',sans-serif;}
+.tab-btn.active{color:var(--navy);border-bottom-color:var(--teal);background:var(--white);}
+.tab-btn:hover:not(.active){color:var(--navy);}
+.tab-content{display:none;padding:1.5rem;}
+.tab-content.active{display:block;}
+
+/* Criteria breakdown */
+.criteria-list{display:flex;flex-direction:column;gap:0.5rem;}
+.crit-row{display:grid;grid-template-columns:160px 1fr 48px 60px 42px;align-items:center;gap:0.6rem;}
+.crit-row-head{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-family:'IBM Plex Mono',monospace;padding-bottom:0.4rem;border-bottom:1px solid var(--border);margin-bottom:0.2rem;}
+.crit-name{font-size:0.78rem;color:var(--text);}
+.crit-bar-track{background:var(--bg);border-radius:2px;height:6px;overflow:hidden;border:1px solid var(--border);}
+.crit-bar-fill{height:100%;border-radius:2px;transition:width 0.6s ease;}
+.crit-score{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--muted);text-align:right;}
+.crit-contrib{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;text-align:right;}
+.crit-weight{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:var(--muted);text-align:right;}
+
+/* Map */
+#site-map{height:420px;border-radius:4px;}
+
+/* Comparison table */
+.comp-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+.comp-table th{background:var(--navy);color:rgba(255,255,255,0.6);font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.65rem 1rem;text-align:left;font-weight:500;}
+.comp-table td{padding:0.7rem 1rem;border-bottom:1px solid var(--border);}
+.comp-table tr:last-child td{border-bottom:none;}
+.comp-table tr:hover td{background:var(--teal-lt);}
+.comp-mono{font-family:'IBM Plex Mono',monospace;font-weight:500;}
+
+.clear-btn{margin-top:0.75rem;padding:0.5rem 1rem;background:transparent;border:1px solid var(--border);border-radius:4px;font-size:0.78rem;color:var(--muted);cursor:pointer;font-family:'IBM Plex Sans',sans-serif;}
+.clear-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+/* Limiting factor notice */
+.notice{padding:0.7rem 1rem;border-radius:4px;font-size:0.8rem;line-height:1.6;margin-top:1rem;}
+.notice-warn{background:#FEF3E2;border-left:3px solid var(--amber);color:#7A4A00;}
+.notice-ok{background:var(--teal-lt);border-left:3px solid var(--teal);color:#1A4A3C;}
+
+footer{background:var(--navy);border-top:1px solid rgba(255,255,255,0.06);padding:1.5rem 2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+footer .logo{font-family:'IBM Plex Mono',monospace;font-size:0.95rem;color:rgba(255,255,255,0.5);}
+footer .logo span{color:var(--teal);}
+footer .credits{font-size:0.72rem;color:rgba(255,255,255,0.3);text-align:right;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="nav-logo-mark">CH<span>A</span>RT</span>
+    <span class="nav-logo-sub">Climate-informed Hazard and Resource Assessment for Turbines</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="tool.html" class="active">Tool</a>
+  </div>
+</nav>
+
+<div class="tool-wrap">
+
+  <!-- ═══════════════════ LEFT PANEL ═══════════════════ -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <h2>Site Assessment</h2>
+      <p>Enter parameters and run assessment</p>
+    </div>
+
+    <!-- 01 Site Info -->
+    <div class="section">
+      <div class="section-head" data-n="01 —">Site Information</div>
+      <div class="field">
+        <label>Site Name / Identifier</label>
+        <input type="text" id="siteName" placeholder="e.g. Empire Wind Block A">
+      </div>
+      <div class="field">
+        <label>Coastal Region</label>
+        <select id="siteRegion">
+          <option>Atlantic</option>
+          <option>Gulf of Mexico</option>
+          <option>Pacific</option>
+          <option>Other / International</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Latitude (°N)</label>
+          <input type="number" id="siteLat" value="39.50" step="0.01" min="-90" max="90">
+        </div>
+        <div class="field">
+          <label>Longitude (°)</label>
+          <input type="number" id="siteLon" value="-72.50" step="0.01" min="-180" max="180">
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 Criteria -->
+    <div class="section">
+      <div class="section-head" data-n="02 —">Site Parameters</div>
+
+      <div class="field">
+        <label>Wind Speed (m/s)</label>
+        <input type="number" id="c_wind" value="8.5" step="0.1" min="0" max="15">
+        <div class="field-hint">Annual avg at hub height. Viable ≥ 7 m/s; optimal 8–12 m/s.</div>
+      </div>
+      <div class="field">
+        <label>Bathymetry — Water Depth (m)</label>
+        <input type="number" id="c_bathy" value="35" step="1" min="0" max="1200">
+        <div class="field-hint">Fixed-bottom: 0–60m · Floating: 60–1000m</div>
+      </div>
+      <div class="field">
+        <label>Distance to Exclusion Zone (km)</label>
+        <input type="number" id="c_excl" value="25" step="0.5" min="0" max="100">
+        <div class="field-hint">Nearest marine sanctuary, military zone, or submarine cable.</div>
+      </div>
+      <div class="field">
+        <label>Distance to Grid Connection (km)</label>
+        <input type="number" id="c_grid" value="60" step="1" min="0" max="500">
+        <div class="field-hint">Nearest substation or transmission line.</div>
+      </div>
+      <div class="field">
+        <label>Hurricane Risk Index (0 = none, 10 = extreme)</label>
+        <input type="number" id="c_hurr" value="3" step="0.1" min="0" max="10">
+        <div class="field-hint">Gulf / SE coast typically 6–9. New England typically 2–4.</div>
+      </div>
+      <div class="field">
+        <label>Distance to Nearest Port (km)</label>
+        <input type="number" id="c_port" value="80" step="1" min="0" max="500">
+        <div class="field-hint">Port capable of handling O&M and construction vessels.</div>
+      </div>
+      <div class="field">
+        <label>Marine Mammal Density (0 = negligible, 10 = very high)</label>
+        <input type="number" id="c_mammal" value="3" step="0.1" min="0" max="10">
+        <div class="field-hint">Includes North Atlantic right whale, harbor porpoise, humpback.</div>
+      </div>
+      <div class="field">
+        <label>Vessel Traffic Index (0 = minimal, 10 = very high)</label>
+        <input type="number" id="c_vessel" value="3" step="0.1" min="0" max="10">
+        <div class="field-hint">Commercial shipping and fishing vessel density.</div>
+      </div>
+    </div>
+
+    <!-- 03 Weights -->
+    <div class="section">
+      <div class="section-head" data-n="03 —">Criterion Weights</div>
+      <div class="field preset-select">
+        <label>Load Preset</label>
+        <select id="presetSelect" onchange="applyPreset()">
+          <option value="research">Research Defaults</option>
+          <option value="atlantic">Atlantic Focus</option>
+          <option value="gulf">Gulf Coast Focus</option>
+          <option value="pacific">Pacific / Floating Turbine</option>
+          <option value="env">Environmental Priority</option>
+        </select>
+      </div>
+
+      <div id="sliders"></div>
+
+      <div class="weight-sum ok" id="weightSum">✓ Weights sum to 100.0%</div>
+    </div>
+
+    <!-- Run -->
+    <div class="section" style="border-bottom:none;">
+      <button class="run-btn" onclick="runAssessment()">▶ Run Site Assessment</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
+  <div class="right-panel" id="rightPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">🌊</div>
+      <h3>No assessment run yet</h3>
+      <p>Fill in site parameters and criterion weights, then click <strong>Run Site Assessment</strong> to generate a full climate-resilient suitability report.</p>
+    </div>
+
+    <div id="results" style="display:none;">
+      <div class="results">
+
+        <!-- Header -->
+        <div class="results-header">
+          <div class="site-title" id="r-name">—</div>
+          <div class="site-meta">
+            <span class="site-region" id="r-region">—</span>
+            <span class="site-coords" id="r-coords">—</span>
+          </div>
+        </div>
+
+        <!-- Score cards -->
+        <div class="score-row">
+          <div class="score-card current">
+            <div class="score-scenario">Current Conditions</div>
+            <span class="score-value" id="r-si-cur" style="color:var(--slate)">—</span>
+            <div class="score-max">/ 10.0</div>
+          </div>
+          <div class="score-card ssp245">
+            <div class="score-scenario">SSP2-4.5 · 2050</div>
+            <span class="score-value" id="r-si-245" style="color:#1d6fa4">—</span>
+            <div class="score-max">/ 10.0</div>
+          </div>
+          <div class="score-card ssp585">
+            <div class="score-scenario">SSP5-8.5 · 2050</div>
+            <span class="score-value" id="r-si-585" style="color:var(--teal)">—</span>
+            <div class="score-max">/ 10.0</div>
+          </div>
+        </div>
+
+        <!-- Resilience + BOEM -->
+        <div class="meta-row">
+          <div class="meta-card">
+            <div class="meta-card-label">Climate Resilience</div>
+            <span class="badge" id="r-badge">—</span>
+          </div>
+          <div class="meta-card">
+            <div class="meta-card-label">vs BOEM Lease Benchmark (7.18)</div>
+            <span class="boem-delta" id="r-boem">—</span>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-wrap">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('breakdown',this)">Criteria Breakdown</button>
+            <button class="tab-btn" onclick="switchTab('radar',this)">Radar Chart</button>
+            <button class="tab-btn" onclick="switchTab('trajectory',this)">Climate Trajectory</button>
+            <button class="tab-btn" onclick="switchTab('map',this)">Site Map</button>
+            <button class="tab-btn" onclick="switchTab('compare',this)">Comparison</button>
+          </div>
+
+          <!-- Breakdown -->
+          <div class="tab-content active" id="tab-breakdown">
+            <div class="criteria-list" id="criteriaList"></div>
+            <div id="limitingNotice"></div>
+          </div>
+
+          <!-- Radar -->
+          <div class="tab-content" id="tab-radar">
+            <canvas id="radarChart" height="340"></canvas>
+          </div>
+
+          <!-- Trajectory -->
+          <div class="tab-content" id="tab-trajectory">
+            <canvas id="trajChart" height="280"></canvas>
+          </div>
+
+          <!-- Map -->
+          <div class="tab-content" id="tab-map">
+            <div id="site-map"></div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:0.6rem;">
+              Click marker for full score summary. Assess multiple sites to see them all on this map.
+            </div>
+          </div>
+
+          <!-- Comparison -->
+          <div class="tab-content" id="tab-compare">
+            <div id="compareContent">
+              <p style="font-size:0.82rem;color:var(--muted);">Assess at least 2 sites (change Site Name between runs) to enable comparison.</p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /results -->
+    </div><!-- /id=results -->
+  </div><!-- /right-panel -->
+</div><!-- /tool-wrap -->
+
+<footer>
+  <div class="logo">CH<span>A</span>RT</div>
+  <div class="credits">
+    Climate-informed Hazard and Resource Assessment for Turbines<br>
+    Have feedback? Reach out at <a href="mailto:chart.contactus@gmail.com" style="color:inherit; text-decoration:underline;">chart.contactus@gmail.com</a>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+const CRITERIA = [
+  {id:'c_wind',   name:'Wind Speed',             inverse:false},
+  {id:'c_bathy',  name:'Bathymetry',              inverse:false},
+  {id:'c_excl',   name:'Exclusion Zones',         inverse:false},
+  {id:'c_grid',   name:'Grid Proximity',          inverse:true},
+  {id:'c_hurr',   name:'Hurricane Risk',          inverse:true},
+  {id:'c_port',   name:'Port Proximity',          inverse:true},
+  {id:'c_mammal', name:'Marine Mammal Density',   inverse:true},
+  {id:'c_vessel', name:'Vessel Traffic',          inverse:true},
+];
+
+const PRESETS = {
+  research: [26.6, 17.4, 17.0, 10.6, 10.6, 6.4, 7.9, 3.5],
+  atlantic: [28.0, 15.0, 18.0, 12.0,  9.0, 8.0, 7.0, 3.0],
+  gulf:     [22.0, 18.0, 15.0, 11.0, 18.0, 7.0, 6.0, 3.0],
+  pacific:  [30.0, 22.0, 14.0, 10.0,  5.0, 9.0, 8.0, 2.0],
+  env:      [20.0, 14.0, 20.0,  8.0, 10.0, 5.0,18.0, 5.0],
+};
+
+const CLIMATE = {
+  current: {windMult:1.00, hurrMult:1.00},
+  ssp245:  {windMult:1.05, hurrMult:1.12},
+  ssp585:  {windMult:1.09, hurrMult:1.20},
+};
+
+const BOEM_MEAN = 7.18;
+
+let sites = [];
+let mapInstance = null;
+let radarChart = null;
+let trajChart = null;
+
+// ══════════════════════════════════════════════════════════
+// STANDARDIZATION
+// ══════════════════════════════════════════════════════════
+function standardize(id, val) {
+  const v = parseFloat(val) || 0;
+  switch(id) {
+    case 'c_wind':   return Math.min(10, Math.max(0, (v - 4) / (13 - 4) * 10));
+    case 'c_bathy':  return v <= 60 ? 10 : Math.max(0, 10 - (v - 60) / (1000 - 60) * 10);
+    case 'c_excl':   return Math.min(10, Math.max(0, v / 50 * 10));
+    case 'c_grid':   return Math.min(10, Math.max(0, 10 - v / 200 * 10));
+    case 'c_hurr':   return Math.min(10, Math.max(0, 10 - v));
+    case 'c_port':   return Math.min(10, Math.max(0, 10 - v / 200 * 10));
+    case 'c_mammal': return Math.min(10, Math.max(0, 10 - v));
+    case 'c_vessel': return Math.min(10, Math.max(0, 10 - v));
+    default:         return 0;
+  }
+}
+
+function applyClimate(rawValues, scenario) {
+  const f = CLIMATE[scenario];
+  const adjusted = {...rawValues};
+  adjusted.c_wind = rawValues.c_wind * f.windMult;
+  adjusted.c_hurr = Math.min(10, rawValues.c_hurr * f.hurrMult);
+  return adjusted;
+}
+
+function computeSI(rawValues, weights, scenario) {
+  const adj = applyClimate(rawValues, scenario);
+  let si = 0;
+  CRITERIA.forEach(c => {
+    const score = standardize(c.id, adj[c.id]);
+    si += (weights[c.id] / 100) * score;
+  });
+  return si;
+}
+
+function getScores(rawValues, scenario) {
+  const adj = applyClimate(rawValues, scenario);
+  const scores = {};
+  CRITERIA.forEach(c => {
+    scores[c.id] = standardize(c.id, adj[c.id]);
+  });
+  return scores;
+}
+
+function classifyResilience(si245, si585) {
+  const minFuture = Math.min(si245, si585);
+  if (minFuture >= 7.0) return 'High';
+  if (minFuture >= 5.0) return 'Moderate';
+  return 'Low';
+}
+
+// ══════════════════════════════════════════════════════════
+// SLIDERS
+// ══════════════════════════════════════════════════════════
+function buildSliders() {
+  const wrap = document.getElementById('sliders');
+  const defaults = PRESETS.research;
+  wrap.innerHTML = CRITERIA.map((c, i) => `
+    <div class="slider-field">
+      <div class="slider-row">
+        <label for="w_${c.id}">${c.name}</label>
+        <input type="range" id="w_${c.id}" min="0" max="50" step="0.5"
+               value="${defaults[i]}" oninput="updateSliderVal('${c.id}',this.value)">
+        <span class="slider-val" id="sv_${c.id}">${defaults[i]}%</span>
+      </div>
+    </div>
+  `).join('');
+  updateWeightSum();
+}
+
+function updateSliderVal(id, val) {
+  document.getElementById('sv_' + id).textContent = parseFloat(val).toFixed(1) + '%';
+  updateWeightSum();
+}
+
+function updateWeightSum() {
+  const total = CRITERIA.reduce((s, c) => s + parseFloat(document.getElementById('w_' + c.id).value), 0);
+  const el = document.getElementById('weightSum');
+  const diff = Math.abs(total - 100);
+  if (diff < 0.5) { el.className = 'weight-sum ok'; el.textContent = `✓ Weights sum to ${total.toFixed(1)}%`; }
+  else if (diff < 5) { el.className = 'weight-sum warn'; el.textContent = `⚠ ${total.toFixed(1)}% — adjust to reach 100%`; }
+  else { el.className = 'weight-sum err'; el.textContent = `✗ ${total.toFixed(1)}% — significantly off 100%`; }
+}
+
+function applyPreset() {
+  const key = document.getElementById('presetSelect').value;
+  const vals = PRESETS[key];
+  CRITERIA.forEach((c, i) => {
+    const el = document.getElementById('w_' + c.id);
+    el.value = vals[i];
+    updateSliderVal(c.id, vals[i]);
+  });
+}
+
+function getWeights() {
+  const w = {};
+  CRITERIA.forEach(c => { w[c.id] = parseFloat(document.getElementById('w_' + c.id).value); });
+  return w;
+}
+
+function getRawValues() {
+  const r = {};
+  CRITERIA.forEach(c => { r[c.id] = parseFloat(document.getElementById(c.id).value) || 0; });
+  return r;
+}
+
+// ══════════════════════════════════════════════════════════
+// SCORE COLOR
+// ══════════════════════════════════════════════════════════
+function scoreColor(s) {
+  if (s >= 7) return '#007A5E';
+  if (s >= 5) return '#C67C00';
+  return '#B43232';
+}
+
+function barGradient(s) {
+  if (s >= 7) return '#007A5E';
+  if (s >= 5) return '#C67C00';
+  return '#B43232';
+}
+
+// ══════════════════════════════════════════════════════════
+// RUN ASSESSMENT
+// ══════════════════════════════════════════════════════════
+function runAssessment() {
+  const rawValues = getRawValues();
+  const weights   = getWeights();
+  const name      = document.getElementById('siteName').value || `Site ${sites.length + 1}`;
+  const region    = document.getElementById('siteRegion').value;
+  const lat       = parseFloat(document.getElementById('siteLat').value);
+  const lon       = parseFloat(document.getElementById('siteLon').value);
+
+  const siCur  = computeSI(rawValues, weights, 'current');
+  const si245  = computeSI(rawValues, weights, 'ssp245');
+  const si585  = computeSI(rawValues, weights, 'ssp585');
+  const resil  = classifyResilience(si245, si585);
+  const scores = getScores(rawValues, 'current');
+  const scores245 = getScores(rawValues, 'ssp245');
+  const scores585 = getScores(rawValues, 'ssp585');
+
+  const site = {name, region, lat, lon, rawValues, weights, scores, scores245, scores585, siCur, si245, si585, resil};
+
+  // Update or add
+  const idx = sites.findIndex(s => s.name === name);
+  if (idx >= 0) sites[idx] = site; else sites.push(site);
+
+  renderResults(site);
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════
+function renderResults(site) {
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  // Header
+  document.getElementById('r-name').textContent = site.name;
+  document.getElementById('r-region').textContent = site.region;
+  document.getElementById('r-coords').textContent =
+    `${site.lat.toFixed(4)}°N, ${site.lon.toFixed(4)}°`;
+
+  // Scores
+  const setSI = (id, val) => {
+    const el = document.getElementById(id);
+    el.textContent = val.toFixed(2);
+    el.style.color = scoreColor(val);
+  };
+  setSI('r-si-cur', site.siCur);
+  setSI('r-si-245', site.si245);
+  setSI('r-si-585', site.si585);
+
+  // Badge
+  const badge = document.getElementById('r-badge');
+  const bCls = {High:'badge-high', Moderate:'badge-mod', Low:'badge-low'};
+  const bIcon = {High:'✦', Moderate:'◈', Low:'◇'};
+  badge.className = 'badge ' + bCls[site.resil];
+  badge.textContent = bIcon[site.resil] + ' ' + site.resil + ' Resilience';
+
+  // BOEM
+  const delta = site.siCur - BOEM_MEAN;
+  const boemEl = document.getElementById('r-boem');
+  boemEl.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(2) + ' pts';
+  boemEl.style.color = delta >= 0 ? '#007A5E' : '#B43232';
+
+  renderBreakdown(site);
+  renderRadar(site);
+  renderTrajectory(site);
+  renderMap();
+  renderComparison();
+}
+
+// ── Breakdown ──
+function renderBreakdown(site) {
+  const weights = site.weights;
+  const scores  = site.scores;
+
+  // Sort by weighted contribution
+  const sorted = [...CRITERIA].sort((a, b) =>
+    (weights[b.id]/100 * scores[b.id]) - (weights[a.id]/100 * scores[a.id])
+  );
+
+  const listEl = document.getElementById('criteriaList');
+  listEl.innerHTML = `
+    <div class="crit-row crit-row-head">
+      <span>Criterion</span><span>Score (0–10)</span>
+      <span style="text-align:right">Raw</span>
+      <span style="text-align:right">Contribution</span>
+      <span style="text-align:right">Wt</span>
+    </div>
+  ` + sorted.map(c => {
+    const sc = scores[c.id];
+    const contrib = (weights[c.id] / 100) * sc;
+    const pct = sc / 10 * 100;
+    const color = barGradient(sc);
+    return `
+      <div class="crit-row">
+        <span class="crit-name">${c.name}</span>
+        <div class="crit-bar-track">
+          <div class="crit-bar-fill" style="width:${pct.toFixed(0)}%;background:${color};"></div>
+        </div>
+        <span class="crit-score">${sc.toFixed(1)}</span>
+        <span class="crit-contrib" style="color:${color}">+${contrib.toFixed(3)}</span>
+        <span class="crit-weight">${weights[c.id].toFixed(0)}%</span>
+      </div>`;
+  }).join('');
+
+  // Total
+  listEl.innerHTML += `
+    <div style="display:flex;justify-content:flex-end;padding-top:0.6rem;margin-top:0.4rem;border-top:1px solid var(--border);font-size:0.8rem;gap:0.5rem;">
+      <span style="color:var(--muted)">Total SI</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;color:${scoreColor(site.siCur)}">${site.siCur.toFixed(3)}</span>
+    </div>`;
+
+  // Limiting factors
+  const limiting = CRITERIA.filter(c => scores[c.id] < 5.0).map(c => c.name);
+  const noticeEl = document.getElementById('limitingNotice');
+  if (limiting.length > 0) {
+    noticeEl.innerHTML = `<div class="notice notice-warn">
+      ⚠ <strong>Limiting factors below moderate threshold (&lt;5.0):</strong> ${limiting.join(', ')}.
+      Consider targeted mitigation or site refinement.
+    </div>`;
+  } else {
+    noticeEl.innerHTML = `<div class="notice notice-ok">
+      ✓ All criteria are at or above the moderate suitability threshold (5.0).
+    </div>`;
+  }
+}
+
+// ── Radar ──
+function renderRadar(site) {
+  const labels = CRITERIA.map(c => c.name);
+  const d_cur  = CRITERIA.map(c => site.scores[c.id]);
+  const d_245  = CRITERIA.map(c => site.scores245[c.id]);
+  const d_585  = CRITERIA.map(c => site.scores585[c.id]);
+
+  const ctx = document.getElementById('radarChart');
+  if (radarChart) { radarChart.destroy(); }
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [
+        {label:'Current',  data:d_cur, borderColor:'#5C6B7A', backgroundColor:'rgba(92,107,122,0.07)', borderDash:[5,3], pointRadius:3},
+        {label:'SSP2-4.5', data:d_245, borderColor:'#1d6fa4', backgroundColor:'rgba(29,111,164,0.07)', pointRadius:3},
+        {label:'SSP5-8.5', data:d_585, borderColor:'#007A5E', backgroundColor:'rgba(0,122,94,0.1)',    pointRadius:3},
+      ]
+    },
+    options: {
+      responsive:true,
+      scales:{r:{min:0,max:10,ticks:{stepSize:2,font:{size:9}},pointLabels:{font:{size:10,family:'IBM Plex Sans'}}}},
+      plugins:{legend:{labels:{font:{size:11,family:'IBM Plex Sans'}}}},
+    }
+  });
+}
+
+// ── Trajectory ──
+function renderTrajectory(site) {
+  const ctx = document.getElementById('trajChart');
+  if (trajChart) { trajChart.destroy(); }
+  trajChart = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels:['Current Conditions','SSP2-4.5  ·  2050','SSP5-8.5  ·  2050'],
+      datasets:[{
+        data:[site.siCur, site.si245, site.si585],
+        backgroundColor:[
+          'rgba(92,107,122,0.75)',
+          'rgba(29,111,164,0.75)',
+          'rgba(0,122,94,0.75)',
+        ],
+        borderColor:['#5C6B7A','#1d6fa4','#007A5E'],
+        borderWidth:1.5,
+        borderRadius:4,
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        annotation:{},
+      },
+      scales:{
+        y:{min:0,max:10.5,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10}}},
+        x:{grid:{display:false},ticks:{font:{size:10,family:'IBM Plex Sans'}}},
+      }
+    }
+  });
+}
+
+// ── Map ──
+let mapMarkers = [];
+function renderMap() {
+  if (!mapInstance) {
+    mapInstance = L.map('site-map', {zoomControl:true});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© CartoDB',
+      maxZoom: 18
+    }).addTo(mapInstance);
+  }
+
+  // Clear existing markers
+  mapMarkers.forEach(m => m.remove());
+  mapMarkers = [];
+
+  if (sites.length === 0) return;
+
+  const bounds = [];
+  sites.forEach(site => {
+    const color = scoreColor(site.siCur);
+    const popupHTML = `
+      <div style="font-family:'IBM Plex Sans',sans-serif;min-width:200px;padding:2px">
+        <strong style="font-size:13px;color:#0A2540">${site.name}</strong>
+        <div style="font-size:11px;color:#6B7A8D;margin:3px 0 8px">${site.region}</div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <tr><td style="padding:3px 0;color:#5C6B7A">Current SI</td>
+              <td style="text-align:right;font-weight:600;color:${scoreColor(site.siCur)}">${site.siCur.toFixed(2)}</td></tr>
+          <tr><td style="padding:3px 0;color:#5C6B7A">SSP2-4.5</td>
+              <td style="text-align:right;font-weight:600;color:#1d6fa4">${site.si245.toFixed(2)}</td></tr>
+          <tr><td style="padding:3px 0;color:#5C6B7A">SSP5-8.5</td>
+              <td style="text-align:right;font-weight:600;color:#007A5E">${site.si585.toFixed(2)}</td></tr>
+          <tr><td style="padding:3px 0;color:#5C6B7A">Resilience</td>
+              <td style="text-align:right;font-weight:600;color:${scoreColor(site.si585)}">${site.resil}</td></tr>
+        </table>
+        <div style="font-size:10px;color:#9CA3AF;margin-top:6px">${site.lat.toFixed(4)}°N, ${site.lon.toFixed(4)}°</div>
+      </div>`;
+
+    const marker = L.circleMarker([site.lat, site.lon], {
+      radius: 10,
+      fillColor: color,
+      color: color,
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.75,
+    }).addTo(mapInstance).bindPopup(popupHTML);
+
+    mapMarkers.push(marker);
+    bounds.push([site.lat, site.lon]);
+  });
+
+  if (bounds.length === 1) {
+    mapInstance.setView(bounds[0], 7);
+  } else {
+    mapInstance.fitBounds(bounds, {padding:[40,40]});
+  }
+
+  // Invalidate size when tab becomes visible
+  mapInstance.invalidateSize();
+}
+
+// ── Comparison ──
+function renderComparison() {
+  const el = document.getElementById('compareContent');
+  if (sites.length < 2) {
+    el.innerHTML = `<p style="font-size:0.82rem;color:var(--muted);">Assess at least 2 sites (change Site Name between runs) to enable comparison.</p>`;
+    return;
+  }
+
+  const sorted = [...sites].sort((a,b) => b.siCur - a.siCur);
+  const rows = sorted.map(s => {
+    const bColors = {High:'#007A5E', Moderate:'#C67C00', Low:'#B43232'};
+    return `<tr>
+      <td><strong>${s.name}</strong></td>
+      <td style="color:var(--muted)">${s.region}</td>
+      <td class="comp-mono" style="color:${scoreColor(s.siCur)}">${s.siCur.toFixed(2)}</td>
+      <td class="comp-mono" style="color:#1d6fa4">${s.si245.toFixed(2)}</td>
+      <td class="comp-mono" style="color:#007A5E">${s.si585.toFixed(2)}</td>
+      <td style="font-weight:600;color:${bColors[s.resil]}">${s.resil}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <table class="comp-table">
+      <thead><tr>
+        <th>Site</th><th>Region</th>
+        <th>Current SI</th><th>SSP2-4.5</th><th>SSP5-8.5</th>
+        <th>Resilience</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <button class="clear-btn" onclick="clearSites()">✕ Clear All Sites</button>`;
+}
+
+function clearSites() {
+  sites = [];
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('results').style.display = 'none';
+  if (mapInstance) { mapMarkers.forEach(m => m.remove()); mapMarkers = []; }
+}
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'map' && mapInstance) {
+    setTimeout(() => mapInstance.invalidateSize(), 100);
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+buildSliders();
+</script>
+</body>
+</html>

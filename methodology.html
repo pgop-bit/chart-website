@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — CHART</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0A2540;--navy2:#0F3460;--teal:#007A5E;--teal-lt:#E6F4F1;
+  --slate:#5C6B7A;--border:#D4DAE2;--bg:#FAFAF8;--white:#FFFFFF;
+  --text:#1A2332;--muted:#6B7A8D;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+nav{position:sticky;top:0;z-index:100;background:rgba(250,250,248,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 4rem;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{display:flex;align-items:baseline;gap:0.75rem;text-decoration:none;}
+.nav-logo-mark{font-family:'IBM Plex Mono',monospace;font-size:1.25rem;font-weight:500;color:var(--navy);letter-spacing:-0.02em;}
+.nav-logo-mark span{color:var(--teal);}
+.nav-logo-sub{font-size:0.7rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:500;border-left:1px solid var(--border);padding-left:0.75rem;}
+.nav-links{display:flex;gap:2.5rem;align-items:center;}
+.nav-links a{font-size:0.82rem;font-weight:500;color:var(--slate);text-decoration:none;letter-spacing:0.02em;transition:color 0.15s;}
+.nav-links a:hover{color:var(--navy);}
+.nav-links a.active{color:var(--navy);border-bottom:2px solid var(--teal);padding-bottom:2px;}
+.btn-nav{background:var(--navy);color:var(--white)!important;padding:0.45rem 1.1rem;border-radius:4px;font-size:0.8rem!important;font-weight:500!important;}
+
+/* Page header */
+.page-header{background:var(--navy);padding:4rem 4rem 3.5rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+.page-header-inner{max-width:1280px;margin:0 auto;}
+.page-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(0,196,160,0.7);margin-bottom:1rem;}
+.page-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,3.5vw,3rem);font-weight:600;color:white;line-height:1.15;letter-spacing:-0.02em;margin-bottom:1rem;}
+.page-desc{font-size:0.95rem;color:rgba(255,255,255,0.5);max-width:600px;line-height:1.75;}
+
+/* Layout */
+.content-wrap{max-width:1280px;margin:0 auto;padding:4rem;display:grid;grid-template-columns:220px 1fr;gap:5rem;align-items:start;}
+.sidebar{position:sticky;top:84px;}
+.sidebar-title{font-size:0.68rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-bottom:1rem;}
+.sidebar nav{display:flex;flex-direction:column;gap:0;}
+.sidebar nav a{font-size:0.82rem;color:var(--slate);text-decoration:none;padding:0.5rem 0;border-bottom:1px solid var(--border);transition:color 0.15s;}
+.sidebar nav a:hover{color:var(--teal);}
+.sidebar nav a.active{color:var(--teal);font-weight:500;}
+
+/* Content sections */
+.content section{margin-bottom:4rem;scroll-margin-top:100px;}
+.section-label{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--teal);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;}
+.section-label::before{content:'';display:block;width:16px;height:1.5px;background:var(--teal);}
+h2{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:600;color:var(--navy);line-height:1.2;letter-spacing:-0.02em;margin-bottom:1.5rem;}
+h3{font-size:0.95rem;font-weight:600;color:var(--navy);margin-bottom:0.6rem;margin-top:1.5rem;}
+p{font-size:0.9rem;color:var(--slate);line-height:1.8;margin-bottom:1rem;}
+
+/* Formula box */
+.formula-box{background:var(--navy);border-radius:6px;padding:1.5rem 2rem;text-align:center;margin:1.5rem 0;}
+.formula{font-family:'IBM Plex Mono',monospace;font-size:1.3rem;color:rgba(0,196,160,0.9);letter-spacing:0.05em;}
+.formula-sub{font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:0.6rem;font-family:'IBM Plex Mono',monospace;}
+
+/* Criteria table */
+.criteria-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin:1.5rem 0;}
+.criteria-table th{background:var(--navy);color:rgba(255,255,255,0.6);font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;padding:0.7rem 1rem;text-align:left;font-weight:500;}
+.criteria-table td{padding:0.8rem 1rem;border-bottom:1px solid var(--border);vertical-align:top;}
+.criteria-table tr:last-child td{border-bottom:none;}
+.criteria-table tr:hover td{background:var(--teal-lt);}
+.weight-pill{display:inline-block;background:var(--teal-lt);color:var(--teal);padding:0.15rem 0.6rem;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;font-weight:500;}
+
+/* Scenario cards */
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;}
+.scenario-card{border:1px solid var(--border);border-radius:6px;padding:1.4rem;border-top:3px solid;}
+.scenario-card.current{border-top-color:var(--slate);}
+.scenario-card.ssp245{border-top-color:#1d6fa4;}
+.scenario-card.ssp585{border-top-color:var(--teal);}
+.scenario-label{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;font-weight:500;letter-spacing:0.08em;margin-bottom:0.6rem;}
+.scenario-card h4{font-size:0.88rem;font-weight:600;color:var(--navy);margin-bottom:0.4rem;}
+.scenario-card p{font-size:0.78rem;color:var(--muted);line-height:1.7;margin:0;}
+.scenario-deltas{display:flex;gap:1rem;margin-top:0.8rem;flex-wrap:wrap;}
+.delta-item{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;background:var(--bg);padding:0.25rem 0.6rem;border-radius:3px;color:var(--text);border:1px solid var(--border);}
+
+/* Resilience classification */
+.resilience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0;}
+.res-card{padding:1.2rem;border-radius:6px;border:1px solid;}
+.res-card.high{background:rgba(0,122,94,0.05);border-color:rgba(0,122,94,0.2);}
+.res-card.mod{background:rgba(198,124,0,0.05);border-color:rgba(198,124,0,0.2);}
+.res-card.low{background:rgba(180,50,50,0.05);border-color:rgba(180,50,50,0.2);}
+.res-card .label{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;font-weight:500;margin-bottom:0.4rem;}
+.res-card.high .label{color:#007A5E;}
+.res-card.mod .label{color:#C67C00;}
+.res-card.low .label{color:#B43232;}
+.res-card p{font-size:0.78rem;color:var(--slate);line-height:1.6;margin:0;}
+
+/* References */
+.ref-list{list-style:none;padding:0;}
+.ref-list li{font-size:0.8rem;color:var(--slate);line-height:1.7;padding:0.6rem 0;border-bottom:1px solid var(--border);}
+.ref-list li:last-child{border-bottom:none;}
+.ref-list em{color:var(--navy);}
+
+/* Callout */
+.callout{background:var(--teal-lt);border-left:3px solid var(--teal);border-radius:0 4px 4px 0;padding:0.9rem 1.1rem;font-size:0.82rem;color:#1A4A3C;line-height:1.7;margin:1.2rem 0;}
+
+footer{background:var(--navy);border-top:1px solid rgba(255,255,255,0.06);padding:2rem 4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+footer .logo{font-family:'IBM Plex Mono',monospace;font-size:1rem;color:rgba(255,255,255,0.5);}
+footer .logo span{color:var(--teal);}
+footer .credits{font-size:0.75rem;color:rgba(255,255,255,0.3);text-align:right;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="nav-logo-mark">CH<span>A</span>RT</span>
+    <span class="nav-logo-sub">Climate-informed Hazard and Resource Assessment for Turbines</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="methodology.html" class="active">Methodology</a>
+    <a href="tool.html" class="btn-nav">Open Tool →</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="page-eyebrow">Technical Documentation</div>
+    <h1 class="page-title">Framework Methodology</h1>
+    <p class="page-desc">
+      A detailed description of the GIS-based multi-criteria decision-making framework,
+      climate projection integration, and neural network validation underpinning CHART.
+    </p>
+  </div>
+</div>
+
+<div class="content-wrap">
+  <div class="sidebar">
+    <div class="sidebar-title">On This Page</div>
+    <nav>
+      <a href="#overview" class="active">Framework Overview</a>
+      <a href="#criteria">Siting Criteria</a>
+      <a href="#ahp">AHP Weights</a>
+      <a href="#climate">Climate Projections</a>
+      <a href="#wlc">Suitability Index</a>
+      <a href="#resilience">Resilience Classification</a>
+      <a href="#validation">Model Validation</a>
+      <a href="#references">References</a>
+    </nav>
+  </div>
+
+  <div class="content">
+
+    <section id="overview">
+      <div class="section-label">Overview</div>
+      <h2>GIS-Based Multi-Criteria Decision-Making</h2>
+      <p>CHART implements a GIS-based Multi-Criteria Decision-Making (MCDM) framework
+      originally developed across 1,615,275 km² of continental U.S. offshore waters.
+      The framework integrates eight siting criteria across technical, environmental,
+      and socio-technical dimensions, weighted using the Analytic Hierarchy Process (AHP),
+      and projects suitability forward to 2050 using CMIP6 climate scenarios.</p>
+      <p>The central output is a Suitability Index (SI) ranging from 0 to 10, computed
+      using Weighted Linear Combination (WLC). Sites are then classified into climate
+      resilience zones based on performance across both future emissions scenarios.</p>
+      <div class="callout">
+        The CHART tool generalizes this framework so that any analyst can assess
+        any candidate site — not just pre-computed U.S. grid cells — by entering
+        raw site parameters and customizing criterion weights for their regional context.
+      </div>
+    </section>
+
+    <section id="criteria">
+      <div class="section-label">Siting Criteria</div>
+      <h2>Eight Criteria, Three Dimensions</h2>
+      <p>Criteria were selected to represent the full scope of considerations documented
+      in offshore wind siting literature, covering technical feasibility, environmental
+      sensitivity, and socio-technical constraints.</p>
+
+      <table class="criteria-table">
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>Dimension</th>
+            <th>Input Unit</th>
+            <th>AHP Weight</th>
+            <th>Rationale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Wind Speed</strong></td>
+            <td>Technical</td>
+            <td>m/s</td>
+            <td><span class="weight-pill">26.6%</span></td>
+            <td>Primary determinant of energy generation potential. Viable ≥ 7 m/s; optimal 8–12 m/s.</td>
+          </tr>
+          <tr>
+            <td><strong>Bathymetry</strong></td>
+            <td>Technical</td>
+            <td>meters depth</td>
+            <td><span class="weight-pill">17.4%</span></td>
+            <td>Determines turbine foundation type. Fixed-bottom viable 0–60m; floating 60–1000m.</td>
+          </tr>
+          <tr>
+            <td><strong>Exclusion Zones</strong></td>
+            <td>Regulatory</td>
+            <td>km from nearest</td>
+            <td><span class="weight-pill">17.0%</span></td>
+            <td>Distance from marine sanctuaries, military zones, submarine cables, and oil platforms.</td>
+          </tr>
+          <tr>
+            <td><strong>Grid Proximity</strong></td>
+            <td>Technical</td>
+            <td>km to substation</td>
+            <td><span class="weight-pill">10.6%</span></td>
+            <td>Transmission cost driver. HVAC preferred &lt;100km; HVDC for longer distances.</td>
+          </tr>
+          <tr>
+            <td><strong>Hurricane Risk</strong></td>
+            <td>Environmental</td>
+            <td>0–10 index</td>
+            <td><span class="weight-pill">10.6%</span></td>
+            <td>Historical hurricane exposure. Extreme winds can destroy 50% of turbines at vulnerable sites.</td>
+          </tr>
+          <tr>
+            <td><strong>Port Proximity</strong></td>
+            <td>Socio-technical</td>
+            <td>km to port</td>
+            <td><span class="weight-pill">6.4%</span></td>
+            <td>Construction and maintenance feasibility. Specialized vessels require adequate port capacity.</td>
+          </tr>
+          <tr>
+            <td><strong>Marine Mammal Density</strong></td>
+            <td>Environmental</td>
+            <td>0–10 index</td>
+            <td><span class="weight-pill">7.9%</span></td>
+            <td>Density of noise-sensitive species including North Atlantic right whale and harbor porpoise.</td>
+          </tr>
+          <tr>
+            <td><strong>Vessel Traffic</strong></td>
+            <td>Socio-technical</td>
+            <td>0–10 index</td>
+            <td><span class="weight-pill">3.5%</span></td>
+            <td>Commercial shipping and fishing vessel density. Raises navigational safety concerns.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="ahp">
+      <div class="section-label">Weight Derivation</div>
+      <h2>Analytic Hierarchy Process</h2>
+      <p>Criterion weights were derived using the Analytic Hierarchy Process (AHP),
+      a structured pairwise comparison method that converts qualitative expert
+      judgements into quantitative weights [6]. AHP is the most widely
+      used weight derivation method in GIS-MCDM offshore wind studies.</p>
+      <p>The resulting weight set has a <strong>Consistency Ratio (CR) of 0.018</strong>,
+      well within the accepted threshold of 0.10, confirming internal consistency
+      of the pairwise comparisons.</p>
+      <p>CHART allows users to override these defaults using regional presets or
+      fully custom weight sliders, enabling analysts to reflect local planning
+      priorities — for example, assigning higher weight to hurricane risk for
+      Gulf of Mexico sites, or higher bathymetry weight for Pacific deep-water contexts.</p>
+    </section>
+
+    <section id="climate">
+      <div class="section-label">Climate Integration</div>
+      <h2>CMIP6 Projection Scenarios</h2>
+      <p>Two Shared Socioeconomic Pathway (SSP) scenarios are assessed at the 2050
+      horizon — aligned with the typical 25–30 year operational lifespan of offshore
+      wind turbines and transmission infrastructure.</p>
+      <p>Only wind speed and hurricane risk are dynamically adjusted across scenarios.
+      The remaining six criteria are either geologically stable over 30-year timeframes
+      or lack robust forecasting frameworks [7].</p>
+
+      <div class="scenario-grid">
+        <div class="scenario-card current">
+          <div class="scenario-label" style="color:var(--slate)">BASELINE</div>
+          <h4>Current Conditions</h4>
+          <p>Historical average wind speed and hurricane exposure data. Represents today's siting environment.</p>
+        </div>
+        <div style="display:contents"><!-- placeholder --></div>
+        <div class="scenario-card ssp245">
+          <div class="scenario-label" style="color:#1d6fa4">SSP2-4.5</div>
+          <h4>Moderate Emissions · 2050</h4>
+          <p>Gradual emissions reductions. ~2.7°C warming by 2100. Consistent with current global policy trajectories.</p>
+          <div class="scenario-deltas">
+            <span class="delta-item">Wind Speed +5%</span>
+            <span class="delta-item">Hurricane Intensity +12%</span>
+          </div>
+        </div>
+        <div class="scenario-card ssp585">
+          <div class="scenario-label" style="color:var(--teal)">SSP5-8.5</div>
+          <h4>High Emissions · 2050</h4>
+          <p>Continued fossil fuel dependence, limited mitigation. ~4.4°C warming by 2100. Upper-bound risk scenario.</p>
+          <div class="scenario-deltas">
+            <span class="delta-item">Wind Speed +9%</span>
+            <span class="delta-item">Hurricane Intensity +20%</span>
+          </div>
+        </div>
+      </div>
+
+      <p>Adjustments are applied as percentage multipliers to baseline values before
+      re-standardization to the 0–10 scale. Wind speed projections follow
+      Hintermaier &amp; Lin (2024); hurricane intensity follows Knutson et al. (2020).</p>
+    </section>
+
+    <section id="wlc">
+      <div class="section-label">Suitability Computation</div>
+      <h2>Weighted Linear Combination</h2>
+      <p>The Suitability Index (SI) is computed using the Weighted Linear Combination
+      (WLC) formula across all eight criteria:</p>
+
+      <div class="formula-box">
+        <div id="formula" style="color:#00c4a0; font-size:1.6rem; text-align:center; padding:0.5rem 0;"></div>
+        <div class="formula-sub">
+          where W<sub>i</sub> = AHP weight (normalized) · C<sub>i</sub> = standardized criterion score (0–10)
+        </div>
+      </div>
+
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+      <script>
+        window.addEventListener('load', function() {
+          katex.render(
+            "SI = \\sum_{i=1}^{8} (w_i \\times c_i)",
+            document.getElementById("formula"),
+            { displayMode: true, throwOnError: false }
+          );
+        });
+      </script>
+
+      <p>All raw input values are first standardized to a 0–10 scale using
+      criterion-specific functions. For criteria where lower values indicate higher
+      suitability (grid proximity, port proximity, hurricane risk, marine mammal
+      density, vessel traffic), inverse standardization is applied so that higher
+      scores consistently indicate better siting conditions across all criteria.</p>
+
+      <h3>Standardization Functions</h3>
+      <p>Wind speed is linearly scaled from the 4–13 m/s range to 0–10.
+      Bathymetry scores 10.0 for depths ≤ 60m (fixed-bottom range), then decreases
+      linearly to 0 at 1000m. Distance-based criteria use linear inverse scaling
+      capped at maximum practical distances. Index-based criteria (hurricane risk,
+      marine mammal density, vessel traffic) are directly inverted: score = 10 − index.</p>
+    </section>
+
+    <section id="resilience">
+      <div class="section-label">Resilience Classification</div>
+      <h2>Three-Tier Zone Classification</h2>
+      <p>Sites are classified based on minimum suitability performance across
+      <em>both</em> future climate scenarios — ensuring that a site classified
+      as high-resilience maintains viability even under the more challenging
+      SSP5-8.5 high-emissions pathway.</p>
+
+      <div class="resilience-grid">
+        <div class="res-card high">
+          <div class="label">High Resilience</div>
+          <p>Suitability ≥ 7.0 under <em>both</em> SSP2-4.5 and SSP5-8.5. Site maintains strong viability through 2050 under any plausible emissions trajectory.</p>
+        </div>
+        <div class="res-card mod">
+          <div class="label">Moderate Resilience</div>
+          <p>Suitability 5.0–7.0 under both scenarios. Site is viable but benefits from ongoing monitoring and adaptive management through project lifetime.</p>
+        </div>
+        <div class="res-card low">
+          <div class="label">Low / Marginal</div>
+          <p>Suitability &lt; 5.0 in at least one scenario. Long-term viability is at risk. Alternative sites should be prioritized where possible.</p>
+        </div>
+      </div>
+
+      <p>In the original U.S. continental study, 138,625 km² were classified as
+      high-resilience — 14–23× the area required for the DOE's 30 GW by 2030
+      target, concentrated primarily in Atlantic waters (99.7% of all high-resilience area).</p>
+    </section>
+
+    <section id="validation">
+      <div class="section-label">Validation</div>
+      <h2>BOEM Lease Area Validation &amp; Neural Network Accuracy</h2>
+      <p>The framework was validated by comparing suitability scores for existing
+      Bureau of Ocean Energy Management (BOEM) lease areas against non-lease offshore
+      waters. BOEM leases — selected through independent regulatory review using
+      similar but distinct criteria — scored 2.11 points higher than non-lease
+      areas (7.18 vs 5.07, p&lt;0.001).</p>
+      <p>This advantage increased slightly under climate scenarios (2.13 under SSP2-4.5;
+      2.16 under SSP5-8.5), demonstrating that current lease areas are inherently
+      climate-resilient and that prioritizing strong fundamental resource characteristics
+      inadvertently produces climate-resilient site selection.</p>
+      <p>A feedforward neural network (TensorFlow/Keras) with three hidden layers (64,
+      32, 16 neurons, ReLU activation) was trained to predict composite suitability
+      scores from the eight standardized criteria. Models achieved R² values of 0.88
+      (SSP2-4.5) and 0.91 (SSP5-8.5), confirming the WLC framework's validity.</p>
+      <p>Feature importance analysis confirmed wind speed as the dominant predictor
+      (52.2% average importance), with bathymetry second (28.8%). Together they
+      account for 81% of predictive capacity, validating their high AHP weights.</p>
+    </section>
+
+    <section id="references">
+      <div class="section-label">References</div>
+      <h2>Key References</h2>
+      <ul class="ref-list">
+        <li><strong>1.</strong> Eyring, V., et al. (2016). Overview of the Coupled Model Intercomparison Project Phase 6 (CMIP6). <em>Geoscientific Model Development, 9(5), 1937–1958.</em></li>
+        <li><strong>2.</strong> Hintermaier, A., &amp; Lin, N. (2024). An Investigation of Climate Change Effects on Design Wind Speeds along the US East and Gulf Coasts. <em>Journal of Structural Engineering, 150(9).</em></li>
+        <li><strong>3.</strong> Knutson, T., et al. (2020). Tropical Cyclones and Climate Change Assessment: Part II: Projected Response to Anthropogenic Warming. <em>Bulletin of the American Meteorological Society, 101(3), E303–E322.</em></li>
+        <li><strong>4.</strong> Malczewski, J. (2000). On the Use of Weighted Linear Combination Method in GIS. <em>Transactions in GIS, 4(1), 5–22.</em></li>
+        <li><strong>5.</strong> Musial, W., et al. (2023). <em>Offshore Wind Market Report: 2023 Edition.</em> National Renewable Energy Laboratory.</li>
+        <li><strong>6.</strong> Saaty, T.L. (1987). Decision making with the analytic hierarchy process. <em>International Journal of Services Sciences, 1(1), 83–98.</em></li>
+        <li><strong>7.</strong> Shen, C., et al. (2024). Increases of Offshore Wind Potential in a Warming World. <em>Geophysical Research Letters, 51(14).</em></li>
+        
+        
+      </ul>
+    </section>
+
+  </div>
+</div>
+
+<footer>
+  <div class="logo">CH<span>A</span>RT</div>
+  <div class="credits">
+    Climate-informed Hazard and Resource Assessment for Turbines<br>
+    Have feedback? Reach out at <a href="mailto:chart.contactus@gmail.com" style="color:inherit; text-decoration:underline;">chart.contactus@gmail.com</a>
+  </div>
+</footer>
+
+</body>
+</html>

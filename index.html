@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHaRT — Climate-informed Hazard and Resource Assessment for Turbines</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0A2540;
+  --navy2:   #0F3460;
+  --teal:    #007A5E;
+  --teal-lt: #E6F4F1;
+  --slate:   #5C6B7A;
+  --border:  #D4DAE2;
+  --bg:      #FAFAF8;
+  --white:   #FFFFFF;
+  --text:    #1A2332;
+  --muted:   #6B7A8D;
+  --amber:   #C67C00;
+  --rule:    #CBD5E0;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,250,248,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 4rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+
+.nav-logo {
+  display: flex; align-items: baseline; gap: 0.75rem; text-decoration: none;
+}
+.nav-logo-mark {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.25rem; font-weight: 500;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+}
+.nav-logo-mark span { color: var(--teal); }
+.nav-logo-sub {
+  font-size: 0.7rem; color: var(--muted); letter-spacing: 0.06em;
+  text-transform: uppercase; font-weight: 500;
+  border-left: 1px solid var(--border); padding-left: 0.75rem;
+}
+
+.nav-links { display: flex; gap: 2.5rem; align-items: center; }
+.nav-links a {
+  font-size: 0.82rem; font-weight: 500; color: var(--slate);
+  text-decoration: none; letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--navy); }
+.nav-links a.active { color: var(--navy); border-bottom: 2px solid var(--teal); padding-bottom: 2px; }
+
+.btn-nav {
+  background: var(--navy); color: var(--white) !important;
+  padding: 0.45rem 1.1rem; border-radius: 4px;
+  font-size: 0.8rem !important; font-weight: 500 !important;
+  transition: background 0.15s !important;
+}
+.btn-nav:hover { background: var(--navy2) !important; }
+
+/* ── HERO ── */
+.hero {
+  min-height: calc(100vh - 64px);
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center;
+  max-width: 1280px; margin: 0 auto;
+  padding: 5rem 4rem;
+  gap: 5rem;
+}
+
+.hero-left { animation: fadeUp 0.7s ease both; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem; font-weight: 500;
+  color: var(--teal); letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.hero-eyebrow::before {
+  content: ''; display: block;
+  width: 24px; height: 2px; background: var(--teal);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  font-weight: 600; line-height: 1.15;
+  color: var(--navy); margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.hero h1 .accent { color: var(--teal); font-style: italic; }
+
+.hero-desc {
+  font-size: 1rem; color: var(--slate);
+  line-height: 1.75; max-width: 520px; margin-bottom: 2.5rem;
+}
+
+.hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--navy); color: var(--white);
+  padding: 0.75rem 1.75rem; border-radius: 4px;
+  font-size: 0.875rem; font-weight: 500;
+  text-decoration: none; transition: background 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover { background: var(--navy2); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: transparent; color: var(--navy);
+  padding: 0.75rem 1.75rem; border-radius: 4px;
+  font-size: 0.875rem; font-weight: 500;
+  text-decoration: none; border: 1.5px solid var(--navy);
+  transition: all 0.15s; letter-spacing: 0.01em;
+}
+.btn-secondary:hover { background: var(--navy); color: var(--white); }
+
+.hero-meta {
+  margin-top: 3rem; padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 2.5rem; flex-wrap: wrap;
+}
+.hero-stat {}
+.hero-stat .n {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.6rem; font-weight: 500;
+  color: var(--navy); display: block; line-height: 1;
+}
+.hero-stat .l {
+  font-size: 0.72rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-top: 0.25rem; display: block;
+}
+
+/* ── HERO RIGHT ── */
+.hero-right {
+  animation: fadeUp 0.7s 0.15s ease both;
+}
+
+.hero-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(10,37,64,0.08), 0 1px 4px rgba(10,37,64,0.05);
+}
+
+.hero-card-header {
+  background: var(--navy);
+  padding: 1rem 1.4rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hero-card-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem; color: rgba(255,255,255,0.6);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.hero-card-dots { display: flex; gap: 5px; }
+.hero-card-dots span {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+}
+
+.hero-card-body { padding: 1.4rem; }
+
+.mock-field {
+  margin-bottom: 1rem;
+}
+.mock-label {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--muted); font-weight: 500; margin-bottom: 0.35rem;
+}
+.mock-input {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 0.5rem 0.75rem;
+  font-size: 0.82rem; color: var(--text); font-family: 'IBM Plex Mono', monospace;
+}
+.mock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.mock-result {
+  margin-top: 1.2rem;
+  background: var(--navy);
+  border-radius: 6px;
+  padding: 1.2rem;
+}
+.mock-result-label {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.4); margin-bottom: 0.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.mock-scores {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+}
+.mock-score-item { text-align: center; }
+.mock-score-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.6rem; font-weight: 500; display: block; line-height: 1;
+}
+.mock-score-scen {
+  font-size: 0.65rem; color: rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem;
+}
+
+.mock-bar-wrap { margin-top: 1rem; }
+.mock-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-bottom: 0.3rem;
+}
+.mock-bar-track {
+  background: rgba(255,255,255,0.1); border-radius: 2px; height: 5px; overflow: hidden;
+}
+.mock-bar-fill {
+  height: 100%; border-radius: 2px; background: var(--teal);
+  animation: barGrow 1.2s 0.8s ease both;
+}
+
+@keyframes barGrow {
+  from { width: 0 !important; }
+}
+
+.mock-badge {
+  display: inline-block; margin-top: 0.8rem;
+  padding: 0.25rem 0.7rem; border-radius: 3px;
+  font-size: 0.7rem; font-weight: 500; font-family: 'IBM Plex Mono', monospace;
+  background: rgba(0,122,94,0.2); color: #2DD4B0; border: 1px solid rgba(0,122,94,0.3);
+}
+
+/* ── SECTION SHARED ── */
+section { padding: 6rem 4rem; }
+.section-inner { max-width: 1280px; margin: 0 auto; }
+
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.section-label::before {
+  content: ''; display: block;
+  width: 20px; height: 1.5px; background: var(--teal);
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 600; color: var(--navy);
+  line-height: 1.2; letter-spacing: -0.02em;
+}
+
+/* ── WHY CHART ── */
+.why-section {
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.why-grid {
+  display: grid; grid-template-columns: 1fr 2fr;
+  gap: 6rem; align-items: start; margin-top: 3rem;
+}
+
+.why-left .section-title { margin-bottom: 1.5rem; }
+.why-left p { color: var(--slate); font-size: 0.9rem; line-height: 1.8; }
+
+.why-cards {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+}
+
+.why-card {
+  padding: 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.why-card:hover {
+  box-shadow: 0 4px 20px rgba(10,37,64,0.07);
+  border-color: var(--teal);
+}
+
+.why-card-icon {
+  width: 36px; height: 36px; border-radius: 6px;
+  background: var(--teal-lt);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1rem; font-size: 1rem;
+}
+.why-card h3 {
+  font-size: 0.9rem; font-weight: 600; color: var(--navy);
+  margin-bottom: 0.5rem; line-height: 1.3;
+}
+.why-card p { font-size: 0.82rem; color: var(--slate); line-height: 1.7; }
+
+/* ── HOW IT WORKS STRIP ── */
+.how-strip {
+  background: var(--navy);
+}
+.how-strip .section-label { color: rgba(0,196,160,0.8); }
+.how-strip .section-label::before { background: rgba(0,196,160,0.8); }
+.how-strip .section-title { color: var(--white); margin-bottom: 3rem; }
+
+.steps-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; overflow: hidden;
+}
+
+.step-item {
+  padding: 2rem 1.6rem;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+}
+.step-item:last-child { border-right: none; }
+
+.step-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem; color: var(--teal);
+  letter-spacing: 0.15em; margin-bottom: 1rem;
+  opacity: 0.8;
+}
+.step-item h3 {
+  font-size: 0.9rem; font-weight: 600; color: var(--white);
+  margin-bottom: 0.6rem; line-height: 1.4;
+}
+.step-item p { font-size: 0.78rem; color: rgba(255,255,255,0.45); line-height: 1.7; }
+.step-arrow {
+  position: absolute; right: -10px; top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.15); font-size: 1.2rem; z-index: 1;
+}
+
+/* ── VALIDATION STRIP ── */
+.validation-section {}
+
+.validation-grid {
+  display: grid; grid-template-columns: 3fr 2fr; gap: 5rem;
+  align-items: center; margin-top: 3rem;
+}
+
+.validation-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+.vstat {
+  padding: 1.4rem;
+  border: 1px solid var(--border); border-radius: 6px;
+  border-left: 3px solid var(--teal);
+}
+.vstat .n {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.8rem; font-weight: 500; color: var(--navy); display: block; line-height: 1;
+}
+.vstat .l { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; display: block; line-height: 1.5; }
+
+.validation-text p {
+  font-size: 0.9rem; color: var(--slate); line-height: 1.8; margin-bottom: 1rem;
+}
+.validation-text .cite {
+  font-size: 0.78rem; color: var(--muted); font-style: italic;
+  padding: 0.75rem 1rem; border-left: 3px solid var(--teal-lt);
+  background: var(--teal-lt); border-radius: 0 4px 4px 0;
+}
+
+/* ── CTA ── */
+.cta-section {
+  background: var(--navy);
+  text-align: center;
+}
+.cta-section .section-label { justify-content: center; color: rgba(0,196,160,0.8); }
+.cta-section .section-label::before { background: rgba(0,196,160,0.8); }
+.cta-section .section-title { color: var(--white); margin-bottom: 1rem; }
+.cta-section p { color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 2.5rem; }
+.cta-actions { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.btn-cta-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--teal); color: var(--white);
+  padding: 0.85rem 2rem; border-radius: 4px;
+  font-size: 0.9rem; font-weight: 500;
+  text-decoration: none; transition: opacity 0.15s;
+  letter-spacing: 0.01em;
+}
+.btn-cta-primary:hover { opacity: 0.88; }
+.btn-cta-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: transparent; color: rgba(255,255,255,0.7);
+  padding: 0.85rem 2rem; border-radius: 4px;
+  font-size: 0.9rem; font-weight: 500;
+  text-decoration: none; border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.15s;
+}
+.btn-cta-secondary:hover { border-color: rgba(255,255,255,0.5); color: white; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--navy);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 2rem 4rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 1rem;
+}
+footer .logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem; color: rgba(255,255,255,0.5);
+}
+footer .logo span { color: var(--teal); }
+footer .credits {
+  font-size: 0.75rem; color: rgba(255,255,255,0.3);
+  text-align: right; line-height: 1.6;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="nav-logo-mark">CH<span>A</span>RT</span>
+    <span class="nav-logo-sub">Climate-informed Hazard and Resource Assessment for Turbines</span>
+  </a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="tool.html" class="btn-nav">Open Tool →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="padding: 0;">
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Offshore Wind Site Assessment</div>
+    <h1>Insert text</h1>
+    <p class="hero-desc">
+      CHaRT is a climate-informed multi-criteria assessment framework for evaluating offshore wind
+      turbine site viability across current conditions and two mid-century emissions scenarios.
+    </p>
+    <div class="hero-actions">
+      <a href="tool.html" class="btn-primary">Run Site Assessment →</a>
+      <a href="methodology.html" class="btn-secondary">View Methodology</a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <span class="n">CMIP6</span>
+        <span class="l">Projection Framework</span>
+      </div>
+      <div class="hero-stat">
+        <span class="n">3</span>
+        <span class="l">Climate Scenarios</span>
+      </div>
+      <div class="hero-stat">
+        <span class="n">8</span>
+        <span class="l">Siting Criteria</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-card">
+      <div class="hero-card-header">
+        <span class="hero-card-title">chart — site assessment output</span>
+        <div class="hero-card-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="hero-card-body">
+        <div class="mock-row">
+          <div class="mock-field">
+            <div class="mock-label">Site Name</div>
+            <div class="mock-input">Empire Wind Block A</div>
+          </div>
+          <div class="mock-field">
+            <div class="mock-label">Region</div>
+            <div class="mock-input">Atlantic</div>
+          </div>
+        </div>
+        <div class="mock-row">
+          <div class="mock-field">
+            <div class="mock-label">Wind Speed</div>
+            <div class="mock-input">9.2 m/s</div>
+          </div>
+          <div class="mock-field">
+            <div class="mock-label">Depth</div>
+            <div class="mock-input">38 m</div>
+          </div>
+        </div>
+        <div class="mock-result">
+          <div class="mock-result-label">Suitability Index</div>
+          <div class="mock-scores">
+            <div class="mock-score-item">
+              <span class="mock-score-val" style="color:#7a9cc0">7.14</span>
+              <div class="mock-score-scen">Current</div>
+            </div>
+            <div class="mock-score-item">
+              <span class="mock-score-val" style="color:#5BB8A8">7.31</span>
+              <div class="mock-score-scen">SSP2-4.5</div>
+            </div>
+            <div class="mock-score-item">
+              <span class="mock-score-val" style="color:#2DD4B0">7.49</span>
+              <div class="mock-score-scen">SSP5-8.5</div>
+            </div>
+          </div>
+          <div class="mock-bar-wrap">
+            <div class="mock-bar-label"><span>Wind Speed</span><span>9.1/10</span></div>
+            <div class="mock-bar-track"><div class="mock-bar-fill" style="width:91%"></div></div>
+          </div>
+          <div class="mock-bar-wrap">
+            <div class="mock-bar-label"><span>Bathymetry</span><span>8.7/10</span></div>
+            <div class="mock-bar-track"><div class="mock-bar-fill" style="width:87%;animation-delay:0.1s"></div></div>
+          </div>
+          <div class="mock-bar-wrap">
+            <div class="mock-bar-label"><span>Grid Proximity</span><span>7.2/10</span></div>
+            <div class="mock-bar-track"><div class="mock-bar-fill" style="width:72%;animation-delay:0.2s"></div></div>
+          </div>
+          <div class="mock-badge">✦ High Climate Resilience</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- WHY CHART -->
+<section class="why-section">
+  <div class="section-inner">
+    <div class="why-grid">
+      <div class="why-left">
+        <div class="section-label">The Problem</div>
+        <h2 class="section-title">Existing frameworks<br>overlook climate resilience.</h2>
+        <p style="margin-top:1.5rem">
+          Offshore wind potential remains untapped in the United States, where only 42% of 
+          offshore areas with >7 m/s wind speeds have been leased for development. These turbines 
+          operate for 25-30 years, but existing siting frameworks rely on static historical data, 
+          missing both climate resilience considerations and the full scope of environmental and 
+          socio-technical constraints.
+        </p>
+        <p style="margin-top:1rem">
+          CHaRT utilizes comprehensive siting criteria paired with CMIP6 mid-century projections 
+          directly into the siting index, surfacing sites that remain viable through the full 
+          operational lifetime of the infrastructure.
+        </p>
+      </div>
+      <div class="why-cards">
+        <div class="why-card">
+          <h3>Climate-Adjusted Wind Resources</h3>
+          <p>Wind speed and hurricane intensity updated for SSP2-4.5 and SSP5-8.5 (2050) using CMIP6 downscaled projections.</p>
+        </div>
+        <div class="why-card">
+          <h3>AHP-Weighted Multi-Criteria</h3>
+          <p>Eight criteria across technical, environmental, and socio-technical dimensions. Consistency ratio: 0.018.</p>
+        </div>
+        <div class="why-card">
+          <h3>Any Site, Anywhere</h3>
+          <p>Enter parameters for any candidate location worldwide. Not limited to pre-computed U.S. zones.</p>
+        </div>
+        <div class="why-card">
+          <h3>BOEM-Validated</h3>
+          <p>Framework validated against current and existing lease areas, based on the Bureau of Ocean Energy and Management (BOEM).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-strip">
+  <div class="section-inner">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Four steps to a validated<br>siting decision.</h2>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-num">01 — INPUT</div>
+        <h3>Enter Site Parameters</h3>
+        <p>Provide wind speed, depth, distance to grid and ports, hurricane exposure, marine mammal density, vessel traffic, and exclusion zone proximity.</p>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="step-item">
+        <div class="step-num">02 — WEIGHT</div>
+        <h3>Customize Criterion Weights</h3>
+        <p>Use research-default AHP weights or apply regional presets (Atlantic, Gulf, Pacific, or environmental priority) to reflect local planning needs.</p>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="step-item">
+        <div class="step-num">03 — PROJECT</div>
+        <h3>Apply Climate Scenarios</h3>
+        <p>Wind speed and hurricane intensity are adjusted for SSP2-4.5 (+5% wind, +12% hurricane) and SSP5-8.5 (+9% wind, +20% hurricane) at 2050.</p>
+        <span class="step-arrow">›</span>
+      </div>
+      <div class="step-item">
+        <div class="step-num">04 — ASSESS</div>
+        <h3>Receive Full Assessment</h3>
+        <p>Get a suitability index across all three scenarios, resilience classification, per-criterion breakdown, and BOEM benchmark comparison.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALIDATION -->
+<section class="validation-section">
+  <div class="section-inner">
+    <div class="validation-grid">
+      <div class="validation-stats">
+        <div class="section-label" style="grid-column:1/-1">Model Validation</div>
+        <h2 class="section-title" style="grid-column:1/-1">The numbers behind CHaRT.</h2>
+        <div class="vstat">
+          <span class="n">R² = 0.91</span>
+          <span class="l">Neural network accuracy across SSP5-8.5 climate scenario</span>
+        </div>
+        <div class="vstat">
+          <span class="n">+2.11 pts</span>
+          <span class="l">BOEM lease area advantage over non-lease offshore waters</span>
+        </div>
+        <div class="vstat">
+          <span class="n">138,625 km²</span>
+          <span class="l">High-resilience zones identified — 14× the DOE 30 GW target area</span>
+        </div>
+        <div class="vstat">
+          <span class="n">p &lt; 0.001</span>
+          <span class="l">Statistical significance of lease area validation</span>
+        </div>
+      </div>
+      <div class="validation-text">
+        <p>
+          CHaRT's Weighted Linear Combination (WLC) suitability index was validated against
+          64,611 grid cells across 1.6 million km² of U.S. continental offshore waters.
+          Existing BOEM lease areas, which constitute expert regulatory lease placements in 
+          place for current or future turbine development, scored higher than non-lease waters 
+          across all three climate scenarios, reinforcing the model's validation against known viable sites.
+        </p>
+        <p>
+          For climate resilience, a feedforward neural network utilizing TensorFlow/Keras with
+          three hidden layers was trained to predict suitability from the eight standardized 
+          criteria. The neural network achieved R² values of 0.88–0.91, confirming that the WLC 
+          framework correctly captures the relationships between siting criteria across scenarios.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-inner">
+    <div class="section-label">Get Started</div>
+    <h2 class="section-title">Assess your candidate site.</h2>
+    <p>Enter site parameters, adjust criterion weights for your region,<br>
+    and receive your full climate-resilient suitability assessment.</p>
+    <div class="cta-actions">
+      <a href="tool.html" class="btn-cta-primary">Open CHaRT Tool →</a>
+      <a href="methodology.html" class="btn-cta-secondary">Read Full Validation</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">CH<span>A</span>RT</div>
+  <div class="credits">
+    Climate-informed Hazard and Resource Assessment for Turbines<br>
+    Have feedback? Reach out at <a href="mailto:chart.contactus@gmail.com" style="color:inherit; text-decoration:underline;">chart.contactus@gmail.com</a>
+  </div>
+</footer>
+
+</body>
+</html>
